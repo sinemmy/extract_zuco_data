@@ -6,7 +6,9 @@ Implementing a simplified version of the Goldstein et al. 2024 approach for mapp
 ## Current Status
 - **Date Started**: 2025-08-06
 - **Current Phase**: BOTH ZuCo 1.0 and 2.0 extraction working! Ready for full run.
-- **Environment**: Python 3.8 conda environment created in `.conda/zuco_extract`
+- **Environment**: 
+  - Primary: Python 3.8 conda environment in `.conda/zuco_extract`
+  - Python 3.13 compatibility: ✅ Tested and verified in `.conda/zuco_py313`
 - **Status**: 
   - ✅ ZuCo 1.0 extraction fully working (12 subjects × 3 tasks = 36 files)
   - ✅ ZuCo 2.0 extraction fully working (18 subjects × 2 tasks = 36 files) 
@@ -14,6 +16,7 @@ Implementing a simplified version of the Goldstein et al. 2024 approach for mapp
   - ✅ Saves separate HDF5 files per subject-task (e.g., zuco1_ZAB_SR.h5)
   - ✅ Checkpoint/resume capability implemented
   - ✅ Full sentence context preserved for LLM alignment
+  - ✅ Python 3.13.5 compatibility verified - data perfectly aligned across versions
 - **Performance**: 
   - Per file: ~20-30 seconds (including save)
   - Full dataset: Estimated 30-45 minutes for all 72 files
@@ -29,10 +32,20 @@ Implementing a simplified version of the Goldstein et al. 2024 approach for mapp
 - Close to ZuCo benchmark's Python 3.7.16
 - Well-tested scipy versions for older MATLAB formats
 
+**Python 3.13 Compatibility**: ✅ Fully tested and verified
+- HDF5 files load correctly
+- Data values are identical across versions
+- All metadata preserved accurately
+
 ### Create Conda Environment
 ```bash
-conda create -n zuco_extract python=3.8
-conda activate zuco_extract
+# Python 3.8 (primary environment)
+conda create --prefix .conda/zuco_extract python=3.8
+conda activate .conda/zuco_extract
+
+# Python 3.13 (for modern compatibility)
+conda create --prefix .conda/zuco_py313 python=3.13
+conda activate .conda/zuco_py313
 ```
 
 ### Required Dependencies
@@ -73,15 +86,15 @@ pip install tqdm  # For progress bars
 - **Eye-tracking Events**: FFD, TRT, GD, SFD, GPT, nFixations
 - **Metadata**: subject ID, session info, task type
 
-## Code Files Created
+## Code Files Created (in `src/` directory)
 
-### 1. `zuco_reconnaissance.py`
+### 1. `src/zuco_reconnaissance.py`
 - Explores both ZuCo 1.0 and 2.0 structures
 - Documents differences between versions
 - Identifies missing data patterns
 - Creates structure report (saves to `zuco_structure_report.json`)
 
-### 2. `zuco_extraction_pipeline.py`
+### 2. `src/zuco_extraction_pipeline.py`
 - Main extraction script for both ZuCo versions
 - Saves separate HDF5 files per subject-task
 - Includes CheckpointManager for resume capability
@@ -89,16 +102,25 @@ pip install tqdm  # For progress bars
 - Uses modular functions for easy testing
 - Progress bars with tqdm
 
-### 3. `test_extraction.py`
+### 3. `src/test_extraction.py`
 - Quick test script for validation
 - Tests both ZuCo 1.0 and 2.0
 - Saves 30 words per test file
 - Verifies data structure and content
 
-### 4. Helper Scripts (created during debugging)
-- `find_word_content.py`: Explores ZuCo 2.0 word content location
-- `extract_zuco2_word.py`: Tests ZuCo 2.0 word extraction
-- `debug_zuco2.py`: Deep dive into ZuCo 2.0 HDF5 structure
+### 4. `src/test_python313_compat.py`
+- Tests Python 3.13 compatibility with HDF5 files
+- Verifies data loading and alignment
+
+### 5. `src/verify_alignment.py`
+- Verifies word-sentence alignment in extracted data
+- Checks data consistency across Python versions
+
+### 6. Helper Scripts (created during debugging)
+- `src/find_word_content.py`: Explores ZuCo 2.0 word content location
+- `src/extract_zuco2_word.py`: Tests ZuCo 2.0 word extraction
+- `src/debug_zuco2.py`: Deep dive into ZuCo 2.0 HDF5 structure
+- `src/compare_formats.py`: Compares ZuCo 1.0 and 2.0 formats
 
 ## TODO List
 1. ✅ Explore zuco_data folder structure
@@ -147,23 +169,34 @@ pip install tqdm  # For progress bars
 
 ## Commands to Run
 ```bash
-# Activate environment
+# Activate environment (Python 3.8)
 conda activate /Users/oshun/Documents/GitHub/extract_zuco_data/.conda/zuco_extract
 
 # Or use directly
 ./.conda/zuco_extract/bin/python
 
+# For Python 3.13 compatibility
+conda activate /Users/oshun/Documents/GitHub/extract_zuco_data/.conda/zuco_py313
+# Or use directly
+./.conda/zuco_py313/bin/python
+
 # Run test extraction (quick validation)
-./.conda/zuco_extract/bin/python test_extraction.py
+./.conda/zuco_extract/bin/python src/test_extraction.py
 
 # Run full extraction (takes 30-45 minutes)
-./.conda/zuco_extract/bin/python zuco_extraction_pipeline.py
+./.conda/zuco_extract/bin/python src/zuco_extraction_pipeline.py
 
 # Check extraction progress
 tail -f extraction_log.txt
 
 # Verify extracted data
 ./.conda/zuco_extract/bin/python -c "import h5py; import os; print('Files created:'); [print(f) for f in os.listdir('extracted_data') if f.endswith('.h5')]"
+
+# Test Python 3.13 compatibility
+./.conda/zuco_py313/bin/python src/test_python313_compat.py
+
+# Verify alignment across Python versions
+./.conda/zuco_py313/bin/python src/verify_alignment.py
 ```
 
 ## Output Structure
