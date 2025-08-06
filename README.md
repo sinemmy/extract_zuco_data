@@ -1,8 +1,42 @@
-# ZuCo EEG Dataset Extraction Pipeline
+# ZuCo EEG Datasets as consistent hd5 files
 
 A robust Python pipeline for extracting and modernizing word-level EEG data from the ZuCo (Zurich Cognitive Language Processing Corpus) dataset. This tool converts MATLAB files into organized HDF5 format with preserved sentence context, perfect for EEG-language model alignment research.
 
 Full extracted data can be found on [ZuCo 2.0 fork on OSF](https://osf.io/wq6ps/)
+
+### Verify Downloaded Data
+
+After downloading the extracted HDF5 files from OSF fork, you can verify the extraction statistics:
+
+```bash
+# Recalculate extraction summary to verify data coverage (default: extracted_data/)
+python src/recalculate_summary.py
+
+# Specify custom input directory
+python src/recalculate_summary.py --input-dir /path/to/hdf5/files
+
+# Specify custom output file
+python src/recalculate_summary.py --output /path/to/summary.json
+
+# Example: Analyze files in a different location and save summary elsewhere
+python src/recalculate_summary.py --input-dir ~/Downloads/zuco_extracted --output ~/analysis/zuco_summary.json
+```
+
+This verification script:
+- Analyzes all HDF5 files to count words with EEG data, frequency bands, and fixation information
+- Automatically compares with any existing `extraction_summary_full.json` in the directory
+- Shows differences between old and new summaries (useful for verifying consistency)
+- Expected coverage is approximately 50-80% of words having EEG recordings
+
+When an existing summary is found, the script will display changes like:
+```
+Differences from existing summary:
+  • Total words: 154,173 → 154,173
+  • Words with raw EEG: 107,831 (69.9%) → 107,831 (69.9%)
+  • New files added: 2
+  • Files with EEG count changes: 5
+```
+# ZuCo EEG Dataset Extraction Pipeline (from original dataset)
 
 ## Features
 
@@ -152,38 +186,7 @@ tail -f extraction_log.txt
 **Expected runtime**: 30-45 minutes for all 72 files
 **Output size**: ~5-10GB (compressed HDF5)
 
-### Verify Extracted Data
 
-After downloading the extracted HDF5 files from OSF, you can verify the extraction statistics:
-
-```bash
-# Recalculate extraction summary to verify data coverage (default: extracted_data/)
-python src/recalculate_summary.py
-
-# Specify custom input directory
-python src/recalculate_summary.py --input-dir /path/to/hdf5/files
-
-# Specify custom output file
-python src/recalculate_summary.py --output /path/to/summary.json
-
-# Example: Analyze files in a different location and save summary elsewhere
-python src/recalculate_summary.py --input-dir ~/Downloads/zuco_extracted --output ~/analysis/zuco_summary.json
-```
-
-This verification script:
-- Analyzes all HDF5 files to count words with EEG data, frequency bands, and fixation information
-- Automatically compares with any existing `extraction_summary_full.json` in the directory
-- Shows differences between old and new summaries (useful for verifying consistency)
-- Expected coverage is approximately 50-80% of words having EEG recordings
-
-When an existing summary is found, the script will display changes like:
-```
-Differences from existing summary:
-  • Total words: 154,173 → 154,173
-  • Words with raw EEG: 107,831 (69.9%) → 107,831 (69.9%)
-  • New files added: 2
-  • Files with EEG count changes: 5
-```
 
 ### Resume Interrupted Extraction
 
