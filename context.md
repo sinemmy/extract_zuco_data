@@ -1,8 +1,5 @@
 # ZuCo Dataset Extraction Project Context
 
-## Project Overview
-Implementing a simplified version of the Goldstein et al. 2024 approach for mapping between EEG signals and language model embeddings using the ZuCo dataset. Goal is to extract and modernize word-level EEG data from Matlab .mat files into a robust Python pipeline.
-
 ## Current Status
 - **Date Started**: 2025-08-06
 - **Current Phase**: BOTH ZuCo 1.0 and 2.0 extraction working! Ready for full run.
