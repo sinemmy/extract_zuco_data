@@ -1,3 +1,23 @@
+# DATASETS (FROM OSF)
+zuco_data/*
+
+# Claude
+CLAUDE.md
+
+# Conda 
+.conda
+.conda/*
+
+# Project outputs
+setup_environment.sh
+zuco_structure_report.json
+extracted_data/
+*.h5
+*.hdf5
+*.parquet
+output/
+reports/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
