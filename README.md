@@ -13,7 +13,7 @@ A robust Python pipeline for extracting and modernizing word-level EEG data from
 
 ## Prerequisites
 
-- Python 3.8 (recommended for MATLAB compatibility)
+- Python 3.8 (recommended for MATLAB compatibility) or Python 3.13+ (verified compatible)
 - Conda or Miniconda
 - ~50GB free disk space for full dataset
 - ZuCo dataset files (download instructions below)
@@ -78,7 +78,8 @@ extract_zuco_data/
 │       │   └── Matlab files/
 │       └── scripts/
 │           └── python_reader/
-└── [pipeline scripts]
+└── src/
+    └── [all Python scripts]
 ```
 
 ### 3. Set Up Python Environment
@@ -90,9 +91,13 @@ bash setup_environment.sh
 
 #### Option B: Manual setup
 ```bash
-# Create conda environment
-conda create -n zuco_extract python=3.8
-conda activate zuco_extract
+# Create conda environment (Python 3.8 recommended)
+conda create --prefix .conda/zuco_extract python=3.8
+conda activate .conda/zuco_extract
+
+# Or for Python 3.13+ compatibility
+conda create --prefix .conda/zuco_py313 python=3.13
+conda activate .conda/zuco_py313
 
 # Install dependencies
 pip install scipy numpy pandas matplotlib h5py
@@ -107,13 +112,28 @@ Run a quick test to verify everything is working:
 
 ```bash
 # Activate environment
-conda activate zuco_extract
+conda activate .conda/zuco_extract
 
 # Run test extraction (processes 4 sample files)
-python test_extraction.py
+python src/test_extraction.py
 ```
 
 This will create test files in `test_output/` and verify both ZuCo 1.0 and 2.0 extraction.
+
+### Python 3.13 Compatibility Verification (Optional)
+
+To verify the extracted data works with modern Python versions:
+
+```bash
+# Using Python 3.13 environment
+conda activate .conda/zuco_py313
+
+# Test HDF5 compatibility
+python src/test_python313_compat.py
+
+# Verify alignment across versions
+python src/verify_alignment.py
+```
 
 ### Full Extraction
 
@@ -121,7 +141,7 @@ Extract the complete dataset:
 
 ```bash
 # Run full extraction with progress bars
-python zuco_extraction_pipeline.py
+python src/zuco_extraction_pipeline.py
 
 # Monitor progress in another terminal
 tail -f extraction_log.txt
@@ -135,7 +155,7 @@ tail -f extraction_log.txt
 The pipeline automatically saves checkpoints. If interrupted, simply run the same command again:
 
 ```bash
-python zuco_extraction_pipeline.py
+python src/zuco_extraction_pipeline.py
 # Will skip already completed files and resume from last checkpoint
 ```
 
@@ -273,7 +293,7 @@ def get_sentences_from_file(filepath):
 ## Technical Details
 
 ### Requirements
-- **Python 3.8**: Optimal compatibility with MATLAB file formats
+- **Python 3.8+**: Optimal compatibility with MATLAB file formats (tested with 3.8 and 3.13)
 - **Memory**: ~4GB RAM for processing
 - **Storage**: ~50GB for raw data, ~10GB for extracted HDF5 files
 
