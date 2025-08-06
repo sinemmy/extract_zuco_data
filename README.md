@@ -1,6 +1,6 @@
 # ZuCo EEG Datasets as consistent HDF5 files
 
-A robust Python pipeline for extracting and modernizing word-level EEG data from the ZuCo (Zurich Cognitive Language Processing Corpus) dataset. This tool converts MATLAB files into organized HDF5 format with preserved sentence context, perfect for EEG-language model alignment research.
+A robust Python pipeline for extracting and modernizing word-level EEG data from the ZuCo (Zurich Cognitive Language Processing Corpus) and ZuCo 2.0 datasets. This tool converts MATLAB files into organized HDF5 format with preserved sentence context, perfect for EEG-language model alignment research.
 
 Full extracted data can be found on [ZuCo 2.0 fork on OSF](https://osf.io/wq6ps/)
 
