@@ -1,0 +1,16 @@
+# Core scientific computing
+scipy>=1.7.0
+numpy>=1.21.0
+pandas>=1.3.0
+
+# For visualization (optional but useful)
+matplotlib>=3.4.0
+
+# For data storage formats
+h5py>=3.0.0
+tables>=3.6.0  # PyTables for HDF5
+pyarrow>=5.0.0  # For Parquet format
+
+# Optional but recommended
+tqdm>=4.62.0  # Progress bars
+ipython>=7.0.0  # Better interactive shell
