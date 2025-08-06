@@ -5,6 +5,7 @@ zuco_data/*
 # Claude
 .claude 
 .claude/*
+CLAUDE.md
 # Conda 
 .conda
 .conda/*
