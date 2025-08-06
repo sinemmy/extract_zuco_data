@@ -130,8 +130,28 @@ class CheckpointManager:
     def load_checkpoint(self) -> Dict:
         """Load existing checkpoint or create new one"""
         if self.checkpoint_file.exists():
-            with open(self.checkpoint_file, 'r') as f:
-                return json.load(f)
+            try:
+                with open(self.checkpoint_file, 'r') as f:
+                    data = json.load(f)
+                    # Ensure required keys exist (handle old checkpoint formats)
+                    if 'completed_files' not in data:
+                        data['completed_files'] = []
+                    if 'last_updated' not in data:
+                        data['last_updated'] = None
+                    if 'total_words_extracted' not in data:
+                        data['total_words_extracted'] = 0
+                    if 'extraction_stats' not in data:
+                        data['extraction_stats'] = {}
+                    return data
+            except (json.JSONDecodeError, KeyError):
+                # If checkpoint is corrupted, start fresh
+                logger.warning("Checkpoint file corrupted, starting fresh")
+                return {
+                    'completed_files': [],
+                    'last_updated': None,
+                    'total_words_extracted': 0,
+                    'extraction_stats': {}
+                }
         return {
             'completed_files': [],  # List of completed file identifiers
             'last_updated': None,
@@ -819,8 +839,10 @@ def extract_all(output_dir: str = "extracted_data",
     
     # Generate and save summary
     summary = generate_summary(output_path)
+    # Convert numpy types to Python native types for JSON serialization
+    summary_json = json.loads(json.dumps(summary, default=lambda x: int(x) if isinstance(x, np.integer) else float(x) if isinstance(x, np.floating) else str(x)))
     with open(output_path / "extraction_summary.json", 'w') as f:
-        json.dump(summary, f, indent=2)
+        json.dump(summary_json, f, indent=2)
     
     logger.info("Extraction complete!")
     return summary
