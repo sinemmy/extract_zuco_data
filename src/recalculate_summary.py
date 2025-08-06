@@ -7,11 +7,13 @@ Previous version only counted the first 100 words in each file, which led to ina
 import h5py
 import json
 import os
+import sys
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime
 from tqdm import tqdm
 import numpy as np
+import argparse
 
 def check_file_stats(filepath):
     """Get accurate statistics for a single file"""
@@ -53,10 +55,14 @@ def check_file_stats(filepath):
             'with_fixations': words_with_fixations
         }
 
-def recalculate_summary():
-    """Recalculate extraction summary with accurate statistics"""
+def recalculate_summary(extracted_dir):
+    """Recalculate extraction summary with accurate statistics
     
-    extracted_dir = Path('extracted_data')
+    Args:
+        extracted_dir: Path to directory containing extracted HDF5 files
+    """
+    
+    extracted_dir = Path(extracted_dir)
     
     # Initialize summary
     summary = {
@@ -125,14 +131,102 @@ def recalculate_summary():
     
     return summary
 
-def main():
-    print("Recalculating extraction summary with accurate counts...")
-    print("This will analyze all extracted HDF5 files\n")
+def compare_summaries(old_summary, new_summary):
+    """Compare two summaries and print differences"""
+    differences = []
     
-    summary = recalculate_summary()
+    # Compare total words
+    if old_summary.get('total_words') != new_summary.get('total_words'):
+        differences.append(f"Total words: {old_summary.get('total_words', 'N/A'):,} → {new_summary.get('total_words', 0):,}")
+    
+    # Compare words with EEG data
+    if old_summary.get('words_with_raw_eeg') != new_summary.get('words_with_raw_eeg'):
+        old_val = old_summary.get('words_with_raw_eeg', 'N/A')
+        new_val = new_summary.get('words_with_raw_eeg', 0)
+        old_pct = old_summary.get('overall_percentages', {}).get('words_with_eeg', 0)
+        new_pct = new_summary.get('overall_percentages', {}).get('words_with_eeg', 0)
+        differences.append(f"Words with raw EEG: {old_val:,} ({old_pct}%) → {new_val:,} ({new_pct}%)")
+    
+    # Compare words with frequency bands
+    if old_summary.get('words_with_frequency_bands') != new_summary.get('words_with_frequency_bands'):
+        old_val = old_summary.get('words_with_frequency_bands', 'N/A')
+        new_val = new_summary.get('words_with_frequency_bands', 0)
+        old_pct = old_summary.get('overall_percentages', {}).get('words_with_frequency_bands', 0)
+        new_pct = new_summary.get('overall_percentages', {}).get('words_with_frequency_bands', 0)
+        differences.append(f"Words with frequency bands: {old_val:,} ({old_pct}%) → {new_val:,} ({new_pct}%)")
+    
+    # Compare words with fixations
+    if old_summary.get('words_with_fixations') != new_summary.get('words_with_fixations'):
+        old_val = old_summary.get('words_with_fixations', 'N/A')
+        new_val = new_summary.get('words_with_fixations', 0)
+        old_pct = old_summary.get('overall_percentages', {}).get('words_with_fixations', 0)
+        new_pct = new_summary.get('overall_percentages', {}).get('words_with_fixations', 0)
+        differences.append(f"Words with fixations: {old_val:,} ({old_pct}%) → {new_val:,} ({new_pct}%)")
+    
+    # Compare file count
+    if old_summary.get('total_files') != new_summary.get('total_files'):
+        differences.append(f"Total files: {old_summary.get('total_files', 'N/A')} → {new_summary.get('total_files', 0)}")
+    
+    # Check for file-level differences
+    old_files = set(old_summary.get('file_statistics', {}).keys())
+    new_files = set(new_summary.get('file_statistics', {}).keys())
+    
+    added_files = new_files - old_files
+    removed_files = old_files - new_files
+    
+    if added_files:
+        differences.append(f"New files added: {len(added_files)}")
+    if removed_files:
+        differences.append(f"Files removed: {len(removed_files)}")
+    
+    # Check for per-file stat changes
+    common_files = old_files & new_files
+    files_with_changes = []
+    for fname in common_files:
+        old_stats = old_summary.get('file_statistics', {}).get(fname, {})
+        new_stats = new_summary.get('file_statistics', {}).get(fname, {})
+        if old_stats.get('words_with_eeg') != new_stats.get('words_with_eeg'):
+            files_with_changes.append(fname)
+    
+    if files_with_changes:
+        differences.append(f"Files with EEG count changes: {len(files_with_changes)}")
+    
+    return differences
+
+def main():
+    parser = argparse.ArgumentParser(description='Recalculate extraction summary with accurate counts of words with EEG data')
+    parser.add_argument('--input-dir', type=str, default='extracted_data',
+                        help='Directory containing extracted HDF5 files (default: extracted_data)')
+    parser.add_argument('--output', type=str, default=None,
+                        help='Output JSON file path (default: <input-dir>/extraction_summary_full.json)')
+    
+    args = parser.parse_args()
+    
+    input_dir = Path(args.input_dir)
+    if not input_dir.exists():
+        print(f"Error: Input directory '{input_dir}' does not exist")
+        sys.exit(1)
+    
+    # Default output path is in the same directory as input
+    output_path = Path(args.output) if args.output else input_dir / 'extraction_summary_full.json'
+    
+    # Check if an existing summary file exists in the input directory
+    existing_summary_path = input_dir / 'extraction_summary_full.json'
+    old_summary = None
+    if existing_summary_path.exists():
+        print(f"Found existing summary file: {existing_summary_path}")
+        try:
+            with open(existing_summary_path, 'r') as f:
+                old_summary = json.load(f)
+        except Exception as e:
+            print(f"Warning: Could not load existing summary: {e}")
+    
+    print("Recalculating extraction summary with accurate counts...")
+    print(f"Analyzing HDF5 files in: {input_dir}\n")
+    
+    summary = recalculate_summary(input_dir)
     
     # Save the corrected summary
-    output_path = Path('extracted_data/extraction_summary_full.json')
     with open(output_path, 'w') as f:
         json.dump(summary, f, indent=2)
     
@@ -146,6 +240,19 @@ def main():
     print(f"  With frequency bands: {summary['words_with_frequency_bands']:,} ({summary['overall_percentages']['words_with_frequency_bands']:.1f}%)")
     print(f"  With fixations: {summary['words_with_fixations']:,} ({summary['overall_percentages']['words_with_fixations']:.1f}%)")
     print(f"\nSummary saved to: {output_path}")
+    
+    # Compare with old summary if it exists
+    if old_summary:
+        differences = compare_summaries(old_summary, summary)
+        if differences:
+            print(f"\n{'='*60}")
+            print("Differences from existing summary:")
+            print(f"{'='*60}")
+            for diff in differences:
+                print(f"  • {diff}")
+        else:
+            print(f"\n✓ No differences from existing summary")
+    
     print(f"{'='*60}")
 
 if __name__ == "__main__":
