@@ -10,7 +10,6 @@ zuco_data/*
 .conda/*
 
 # Project outputs
-setup_environment.sh
 zuco_structure_report.json
 extracted_data/
 *.h5
