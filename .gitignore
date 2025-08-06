@@ -1,9 +1,10 @@
 # DATASETS (FROM OSF)
+zuco_data
 zuco_data/*
 
 # Claude
-CLAUDE.md
-
+.claude 
+.claude/*
 # Conda 
 .conda
 .conda/*
@@ -17,6 +18,7 @@ extracted_data/
 *.parquet
 output/
 reports/
+test_output/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
