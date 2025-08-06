@@ -49,7 +49,7 @@ Differences from existing summary:
 
 ## Prerequisites
 
-- Python 3.8 (recommended for MATLAB compatibility) or Python 3.13+ (verified compatible)
+- Python 3.8 (recommended for MATLAB compatibility) for HDF5 file creation. (Python 3.13+ verified compatible with existing HDF5)
 - Conda or Miniconda
 - ~50GB free disk space for full dataset
 - ZuCo dataset files (download instructions below)
