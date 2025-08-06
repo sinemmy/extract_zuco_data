@@ -12,7 +12,6 @@
   - ✅ Handles missing data gracefully (ZDN, ZJS, ZPH, ZGW known gaps)
   - ✅ Saves separate HDF5 files per subject-task (e.g., zuco1_ZAB_SR.h5)
   - ✅ Checkpoint/resume capability implemented
-  - ✅ Full sentence context preserved for LLM alignment
   - ✅ Python 3.13.5 compatibility verified - data perfectly aligned across versions
 - **Performance**: 
   - Per file: ~20-30 seconds (including save)
@@ -131,8 +130,7 @@ pip install tqdm  # For progress bars
 9. ✅ Implement ZuCo 2.0 HDF5 extraction (fixed using official scripts)
 10. ✅ Optimize save performance (using LZF compression)
 11. ✅ Add checkpoint/resume capability
-12. ✅ Preserve sentence context for LLM alignment
-13. ⏳ Run full extraction (user will run separately)
+12. ⏳ Run full extraction (user will run separately)
 
 ## Key Discoveries About ZuCo 2.0 Structure
 
@@ -274,7 +272,7 @@ zuco1_ZAB_SR.h5
 └── ...
 ```
 
-### Important for LLM Alignment
+### Important for eeg-text alignment
 - **Full context preserved**: Each word knows its sentence and position
 - **Sentence tracking**: `sentence_id` links words to their sentence
 - **Word order**: `word_index` preserves word position in sentence
