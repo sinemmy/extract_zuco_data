@@ -152,6 +152,20 @@ tail -f extraction_log.txt
 **Expected runtime**: 30-45 minutes for all 72 files
 **Output size**: ~5-10GB (compressed HDF5)
 
+### Verify Extracted Data
+
+After downloading the extracted HDF5 files from OSF, you can verify the extraction statistics:
+
+```bash
+# Recalculate extraction summary to verify data coverage
+python src/recalculate_summary.py
+
+# This will create extraction_summary_full.json with accurate counts
+# Compare with the provided extraction_summary_full.json to verify consistency
+```
+
+This verification script analyzes all HDF5 files to count how many words actually contain EEG data, frequency bands, and fixation information. Expected coverage is approximately 50-80% of words having EEG recordings.
+
 ### Resume Interrupted Extraction
 
 The pipeline automatically saves checkpoints. If interrupted, simply run the same command again:
